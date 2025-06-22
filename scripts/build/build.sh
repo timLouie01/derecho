@@ -73,12 +73,15 @@ else
     install_prefix=$DERECHO_INSTALL_PREFIX
 fi
 
-cmake_defs="-DCMAKE_BUILD_TYPE=${build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_INSTALL_PREFIX=${install_prefix}"
+# Modified cmake_defs for Testing
+cmake_defs="-DCMAKE_BUILD_TYPE=${build_type} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_INSTALL_PREFIX=${install_prefix} -DENABLE_HMEM=1"
+
 build_path="build-${build_type}"
 
 if [[ $2 == "USE_VERBS_API" ]]; then
     cmake_defs="${cmake_defs} -DUSE_VERBS_API=1"
 fi
+
 
 # clear existing installed
 # rm -rf ${install_prefix}/lib/libderecho*
