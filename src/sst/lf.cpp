@@ -695,7 +695,7 @@ void _resources::oob_remote_op(uint32_t op, const struct iovec* iov, int iovcnt,
                                          [this](){return remote_failed.load();},
                                          fi_readmsg,
                                          this->ep,
-                                         &msg, FI_COMPLETION);
+                                         &msg, FI_COMPLETION | FI_FENCE);
         }
     } else if (op == OOB_OP_SEND || op == OOB_OP_RECV) {
         // do two-sided RDMA transfer
