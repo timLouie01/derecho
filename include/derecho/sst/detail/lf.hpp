@@ -22,6 +22,9 @@
 #include <tuple>
 #include <queue>
 
+#include <fstream>
+#include <iostream>
+
 #ifndef LF_VERSION
 #define LF_VERSION FI_VERSION(1, 5)
 #endif
@@ -464,6 +467,8 @@ inline int64_t fail_if_nonzero_retry_on_eagain(const std::string& description, c
     return return_code;
 }
 
+int numRetry[50000];
+int numRetryCounter = 0;
 /**
  * Calls a LibFabrics function with any number of arguments forwarded via perfect
  * forwarding. If the function returns the FI_EAGAIN error code, keeps calling it
@@ -487,13 +492,26 @@ inline int64_t retry_on_eagain_unless(const std::string& description,
                                       FuncType lf_function, ArgTypes&&... lf_args) {
     //Some lf functions return int, others return ssize_t, but both will fit in an int64_t
     int64_t return_code;
+    int i = 0;
     do {
         return_code = (*lf_function)(std::forward<ArgTypes>(lf_args)...);
+        i ++;
     } while(return_code == -FI_EAGAIN && !abort_predicate());
     //If the abort predicate is true, don't report the error, since we are giving up anyway
     if(return_code != 0 && !abort_predicate()) {
         dbg_default_error("LibFabric error! Return code = {}. Operation description: {}", return_code, description);
         std::cerr << "LibFabric error! Ret=" << return_code << ", desc=" << description << std::endl;
+    }
+    ++numRetryCounter;
+    numRetry[numRetryCounter] = i;
+    if (numRetryCounter > 15000){
+        const char* filename = "num_retry.csv";
+        std::ofstream out(filename);
+        out << "index,numRetry\n";
+        for (int i = 0; i < numRetryCounter; ++i) {
+        out << i << ',' << numRetry[i] << '\n';
+        }
+         out.close();
     }
     return return_code;
 }
