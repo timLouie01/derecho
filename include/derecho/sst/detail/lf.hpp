@@ -467,7 +467,7 @@ inline int64_t fail_if_nonzero_retry_on_eagain(const std::string& description, c
     return return_code;
 }
 
-int numRetry[50000];
+int numRetries[50000];
 int numRetryCounter = 0;
 /**
  * Calls a LibFabrics function with any number of arguments forwarded via perfect
@@ -503,13 +503,13 @@ inline int64_t retry_on_eagain_unless(const std::string& description,
         std::cerr << "LibFabric error! Ret=" << return_code << ", desc=" << description << std::endl;
     }
     ++numRetryCounter;
-    numRetry[numRetryCounter] = i;
+    numRetries[numRetryCounter] = i;
     if (numRetryCounter > 15000){
         const char* filename = "num_retry.csv";
         std::ofstream out(filename);
         out << "index,numRetry\n";
         for (int i = 0; i < numRetryCounter; ++i) {
-        out << i << ',' << numRetry[i] << '\n';
+        out << i << ',' << numRetries[i] << '\n';
         }
          out.close();
     }
